@@ -65,6 +65,10 @@ if [ "$strpart" == "diskused" ]; then
 	UNITtest=$(snmpget -v2c -c "$strCommunity" "$strHostname" 1.3.6.1.4.1.24681.1.2.17.1.4.1 | awk '{print $5}' | sed 's/.*\(.B\).*/\1/')
 	UNITtest2=$(snmpget -v2c -c "$strCommunity" "$strHostname" 1.3.6.1.4.1.24681.1.2.17.1.5.1 | awk '{print $5}' | sed 's/.*\(.B\).*/\1/')
         #echo $disk - $free - $UNITtest - $UNITtest2 
+	if [[ "$disk" == "" || "$free" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+	fi
 
 	if [ "$UNITtest" == "TB" ]; then
 	 factor=$(echo "scale=0; 1000000" | bc -l)
@@ -116,6 +120,10 @@ if [ "$strpart" == "diskused" ]; then
 # CPU ----------------------------------------------------------------------------------------------------------------------------------------------
 elif [ "$strpart" == "cpu" ]; then
         CPU=$(snmpget -v2c -Ln -c "$strCommunity" $strHostname 1.3.6.1.4.1.24681.1.2.1.0 -Oqv | sed -E 's/"|\s%//g')
+	if [[ "$CPU" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+	fi
 
         OUTPUT="CPU Load="$CPU"%|CPU load="$CPU"%;$strWarning;$strCritical;0;100"
 
@@ -133,6 +141,10 @@ elif [ "$strpart" == "cpu" ]; then
 # CPUTEMP ----------------------------------------------------------------------------------------------------------------------------------------------
 elif [ "$strpart" == "cputemp" ]; then
     	TEMP0=$(snmpget -v2c -c "$strCommunity" $strHostname  .1.3.6.1.4.1.24681.1.2.5.0 | awk '{print $4}' | cut -c2-3)
+	if [[ "$TEMP0" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+	fi
 	OUTPUT="CPU Temperature="$TEMP0"C|NAS CPUtermperature="$TEMP0"C;$strWarning;$strCritical;0;90"
 
     	if [ "$TEMP0" -ge "89" ]; then
@@ -155,6 +167,10 @@ elif [ "$strpart" == "cputemp" ]; then
 elif [ "$strpart" == "freeram" ]; then
 	TOTALRAM=$(snmpget -v2c -c "$strCommunity" $strHostname 1.3.6.1.4.1.24681.1.2.2.0 | awk '{print $4 $5}' | sed 's/.\(.*\)...../\1/')
 	FREERAM=$(snmpget -v2c -c "$strCommunity" $strHostname 1.3.6.1.4.1.24681.1.2.3.0 | awk '{print $4 $5}' | sed 's/.\(.*\)...../\1/')
+	if [[ "$TOTALRAM" == "" || "$FREERAM" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+	fi
 	
 	let "USEDRAM=($TOTALRAM-$FREERAM)"
 	
@@ -178,6 +194,10 @@ elif [ "$strpart" == "freeram" ]; then
 # System Temperature---------------------------------------------------------------------------------------------------------------------------------------
 elif [ "$strpart" == "temp" ]; then
     	TEMP0=$(snmpget -v2c -c "$strCommunity" $strHostname 1.3.6.1.4.1.24681.1.2.6.0 | awk '{print $4}' | cut -c2-3)
+	if [[ "$TEMP0" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+	fi
 	OUTPUT="Temperature="$TEMP0"C|NAS termperature="$TEMP0"C;$strWarning;$strCritical;0;80"
 
     	if [ "$TEMP0" -ge "89" ]; then
@@ -202,6 +222,10 @@ elif [ "$strpart" == "temp" ]; then
 elif [ "$strpart" == "hdtemp" ]; then
 
     hdnum=$(snmpget -v2c -c "$strCommunity" "$strHostname"  1.3.6.1.4.1.24681.1.4.1.1.1.1.5.1.0 | awk '{print $4}')
+	if [[ "$hdnum" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+	fi
 
     output="OK: ($hdnum disks)"
     ret=0
@@ -234,6 +258,10 @@ elif [ "$strpart" == "hdtemp" ]; then
 # HD1 Temperature---------------------------------------------------------------------------------------------------------------------------------------
 elif [ "$strpart" == "hd1temp" ]; then
     	TEMPHD=$(snmpget -v2c -c "$strCommunity" $strHostname 1.3.6.1.4.1.24681.1.2.11.1.3.1 | awk '{print $4}' | cut -c2-3)
+	if [[ "$TEMPHD" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+	fi
 	OUTPUT="Temperature="$TEMPHD"C|HDD1 termperature="$TEMPHD"C;$strWarning;$strCritical;0;60"
 
     	if [ "$TEMPHD" -ge "59" ]; then
@@ -255,6 +283,10 @@ elif [ "$strpart" == "hd1temp" ]; then
 # HD2 Temperature---------------------------------------------------------------------------------------------------------------------------------------
 elif [ "$strpart" == "hd2temp" ]; then
     	TEMPHD=$(snmpget -v2c -c "$strCommunity" $strHostname 1.3.6.1.4.1.24681.1.2.11.1.3.2 | awk '{print $4}' | cut -c2-3)
+	if [[ "$TEMPHD" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+	fi
 	OUTPUT="Temperature="$TEMPHD"C|HDD2 termperature="$TEMPHD"C;$strWarning;$strCritical;0;60"
 
     	if [ "$TEMPHD" -ge "59" ]; then
@@ -276,6 +308,10 @@ elif [ "$strpart" == "hd2temp" ]; then
 # HD3 Temperature---------------------------------------------------------------------------------------------------------------------------------------
 elif [ "$strpart" == "hd3temp" ]; then
     	TEMPHD=$(snmpget -v2c -c "$strCommunity" $strHostname 1.3.6.1.4.1.24681.1.2.11.1.3.3 | awk '{print $4}' | cut -c2-3)
+	if [[ "$TEMPHD" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+	fi
 	OUTPUT="Temperature="$TEMPHD"C|HDD3 termperature="$TEMPHD"C;$strWarning;$strCritical;0;60"
 
     	if [ "$TEMPHD" -ge "59" ]; then
@@ -297,6 +333,10 @@ elif [ "$strpart" == "hd3temp" ]; then
 # HD4 Temperature---------------------------------------------------------------------------------------------------------------------------------------
 elif [ "$strpart" == "hd4temp" ]; then
     	TEMPHD=$(snmpget -v2c -c "$strCommunity" $strHostname 1.3.6.1.4.1.24681.1.2.11.1.3.4 | awk '{print $4}' | cut -c2-3)
+	if [[ "$TEMPHD" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+	fi
 	OUTPUT="Temperature="$TEMPHD"C|HDD4 termperature="$TEMPHD"C;$strWarning;$strCritical;0;60"
 
     	if [ "$TEMPHD" -ge "59" ]; then
@@ -318,6 +358,10 @@ elif [ "$strpart" == "hd4temp" ]; then
 # HD5 Temperature---------------------------------------------------------------------------------------------------------------------------------------
 elif [ "$strpart" == "hd5temp" ]; then
     	TEMPHD=$(snmpget -v2c -c "$strCommunity" $strHostname 1.3.6.1.4.1.24681.1.2.11.1.3.5 | awk '{print $4}' | cut -c2-3)
+	if [[ "$TEMPHD" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+	fi
 	OUTPUT="Temperature="$TEMPHD"C|HDD5 termperature="$TEMPHD"C;$strWarning;$strCritical;0;60"
 
     	if [ "$TEMPHD" -ge "59" ]; then
@@ -339,6 +383,10 @@ elif [ "$strpart" == "hd5temp" ]; then
 # HD6 Temperature---------------------------------------------------------------------------------------------------------------------------------------
 elif [ "$strpart" == "hd6temp" ]; then
         TEMPHD=$(snmpget -v2c -c "$strCommunity" $strHostname 1.3.6.1.4.1.24681.1.2.11.1.3.6 | awk '{print $4}' | cut -c2-3)
+	if [[ "$TEMPHD" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+	fi
         OUTPUT="Temperature="$TEMPHD"C|HDD6 termperature="$TEMPHD"C;$strWarning;$strCritical;0;60"
 
         if [ "$TEMPHD" -ge "59" ]; then
@@ -360,6 +408,10 @@ elif [ "$strpart" == "hd6temp" ]; then
 # HD7 Temperature---------------------------------------------------------------------------------------------------------------------------------------
 elif [ "$strpart" == "hd7temp" ]; then
         TEMPHD=$(snmpget -v2c -c "$strCommunity" $strHostname 1.3.6.1.4.1.24681.1.2.11.1.3.7 | awk '{print $4}' | cut -c2-3)
+	if [[ "$TEMPHD" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+	fi
         OUTPUT="Temperature="$TEMPHD"C|HDD7 termperature="$TEMPHD"C;$strWarning;$strCritical;0;60"
 
         if [ "$TEMPHD" -ge "59" ]; then
@@ -381,6 +433,10 @@ elif [ "$strpart" == "hd7temp" ]; then
 # HD8 Temperature---------------------------------------------------------------------------------------------------------------------------------------
 elif [ "$strpart" == "hd8temp" ]; then
         TEMPHD=$(snmpget -v2c -c "$strCommunity" $strHostname 1.3.6.1.4.1.24681.1.2.11.1.3.8 | awk '{print $4}' | cut -c2-3)
+	if [[ "$TEMPHD" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+	fi
         OUTPUT="Temperature="$TEMPHD"C|HDD8 termperature="$TEMPHD"C;$strWarning;$strCritical;0;60"
 
         if [ "$TEMPHD" -ge "59" ]; then
@@ -579,6 +635,10 @@ elif [ "$strpart" == "hd8status" ]; then
 elif [ "$strpart" == "hdstatus" ]; then
 
 	hdnum=$(snmpget -v2c -c "$strCommunity" "$strHostname"  1.3.6.1.4.1.24681.1.4.1.1.1.1.5.1.0 | awk '{print $4}')
+	if [[ "$hdnum" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+	fi
 
         hdok=0
         hdnop=0
@@ -613,6 +673,10 @@ elif [ "$strpart" == "volstatus" ]; then
      CRITICAL=0
      VOL=1
      VOLCOUNT=$(snmpget -v2c -c "$strCommunity" "$strHostname" .1.3.6.1.4.1.24681.1.2.16.0 | awk '{print $4}')
+     if [[ "$VOLCOUNT" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+     fi
 
      while [ "$VOL" -le "$VOLCOUNT" ]; do
         Vol_Status=$(snmpget -v2c -c "$strCommunity" "$strHostname" .1.3.6.1.4.1.24681.1.2.17.1.6.$VOL | awk '{print $4}' | sed 's/^"\(.*\).$/\1/')
@@ -698,6 +762,10 @@ elif [ "$strpart" == "powerstatus" ]; then
      CRITICAL=0
      PS=1
      COUNT=$(snmpget -v2c -c "$strCommunity" $strHostname .1.3.6.1.4.1.24681.1.4.1.1.1.1.3.1.0 | awk '{print $4}')
+     if [[ "$COUNT" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+     fi
      while [ "$PS" -le "$COUNT" ]; do
         STATUS=$(snmpget -v2c -c "$strCommunity" $strHostname .1.3.6.1.4.1.24681.1.4.1.1.1.1.3.2.1.4.$PS | awk '{print $4}')
         if [ "$STATUS" -eq "0" ]; then
@@ -732,6 +800,10 @@ elif [ "$strpart" == "fans" ]; then
      CRITICAL=0
      FAN=1
      FANCOUNT=$(snmpget -v2c -c "$strCommunity" "$strHostname" .1.3.6.1.4.1.24681.1.2.14.0 | awk '{print $4}')
+     if [[ "$FANCOUNT" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+     fi
      while [ "$FAN" -le "$FANCOUNT" ]; do
         FANSPEED=$(snmpget -v2c -c "$strCommunity" "$strHostname" .1.3.6.1.4.1.24681.1.2.15.1.3.$FAN | awk '{print $4}' | cut -c 2- )
 
@@ -779,6 +851,10 @@ elif [ "$strpart" == "fans" ]; then
 elif [ "$strpart" == "systemuptime" ]; then
     	netuptime=$(snmpget -v2c -c "$strCommunity" "$strHostname" .1.3.6.1.2.1.1.3.0 | awk '{print $5, $6, $7, $8}')
     	sysuptime=$(snmpget -v2c -c "$strCommunity" "$strHostname"  .1.3.6.1.2.1.25.1.1.0 | awk '{print $5, $6, $7, $8}') 
+	if [[ "$netuptime" == "" || "$sysuptime" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+	fi
     	
 	echo System Uptime $sysuptime - Network Uptime $netuptime
 	exit 0
@@ -790,6 +866,10 @@ elif [ "$strpart" == "sysinfo" ]; then
 	VOLCOUNT=$(snmpget -v2c -c "$strCommunity" "$strHostname" .1.3.6.1.4.1.24681.1.2.16.0 | awk '{print $4}')
 	name=$(snmpget -v2c -c "$strCommunity" "$strHostname"  .1.3.6.1.4.1.24681.1.2.13.0  | awk '{print $4}' | sed 's/^"\(.*\)$/\1/')
 	firmware=$(snmpget -v2c -c "$strCommunity" "$strHostname"  .1.3.6.1.2.1.47.1.1.1.1.9.1 | awk '{print $4}' | sed 's/^"\(.*\)$/\1/')
+	if [[ "$name" == "" || "$model" == "" || "$firmware" == "" || "$hdnum" == "" || "$VOLCOUNT" == "" ]]; then
+		echo "CRITICAL: SNMP error";
+		exit 2;
+	fi
 
 	echo NAS $name, Model $model, Firmware $firmware, Max HD number $hdnum, No. Volume $VOLCOUNT
 	exit 0
